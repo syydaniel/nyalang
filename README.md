@@ -1,11 +1,14 @@
 # Nya · 猫猫语
 
 A small **constructed cat language**: an invented lexicon, a light regular
-grammar, and a hand-built **cat-glyph font** where every letter is drawn as a
-cat. Type English, get Nya, render it as rows of kittens.
+grammar, and one unified writing system where **every word is a single cat**.
+Each cat's anatomy encodes the word, sound and meaning together. Type English,
+get Nya, render it as rows of cats.
 
 Built as the playful "猫猫语" mode for [syydaniel.github.io](https://syydaniel.github.io),
 extracted here as a standalone language system.
+
+![Nya: every word is one cat-sigil](demo/preview-sigils.png)
 
 ```
 Hello! I study water and plastic.
@@ -69,6 +72,8 @@ python3 font/build-cat-font.py   # -> font/nyaglyph.woff
 ```
 
 ## Logographic writing (inspired by *Arrival*)
+
+![Nya sentence-rings: nested clauses, linking strokes, ink-weight](demo/preview-rings.png)
 
 Nya can also be written **non-phonetically**, as circular logograms. There are
 16 semantic **radicals** (atoms of meaning); every word is a transparent
