@@ -42,28 +42,20 @@
   <p class="sub">Proper nouns are not turned into sigils; they are spelled in the cat-alphabet, a separate register.</p>
   <div class="alpha" id="alpha">Yiyang Shen · Daniel</div>
 
-  <h2>Also writable as Arrival-style rings: one ring per sentence</h2>
-  <div class="logos" id="logos"></div>
-
-  <h2>The 16 radicals: learn these and you can decode both the foreheads and the circles</h2>
+  <h2>The 16 radicals: learn these and you can decode the foreheads</h2>
   <div class="legend" id="legend"></div>
 
   <script type="module">
     import { translate } from '../nya/nya.mjs';
     import { renderCatText } from '../nya/script.mjs';
-    import { renderNested, renderGlyph, RADICAL_GLOSSES } from '../nya/logogram.mjs';
+    import { renderGlyph, RADICAL_GLOSSES } from '../nya/logogram.mjs';
     const inp = document.getElementById('in');
     const elNya = document.getElementById('nya');
     const elSigils = document.getElementById('sigils');
-    const elLogos = document.getElementById('logos');
 
     function update() {
       elSigils.innerHTML = renderCatText(inp.value, { size: 46 });
       elNya.textContent = translate(inp.value);
-      const sentences = inp.value.split(/(?<=[.!?])\s+/).map((s) => s.trim()).filter(Boolean);
-      elLogos.innerHTML = (sentences.length ? sentences : [inp.value])
-        .map((s) => `<div class="item" style="width:auto;max-width:220px">${renderNested(s, { size: 200 })}<div class="w">${s}</div></div>`)
-        .join('');
     }
     inp.addEventListener('input', update);
     update();

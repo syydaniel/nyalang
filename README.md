@@ -60,25 +60,11 @@ water miru · river mirun · plastic puran · microplastic mipuran · world wora
 research purwa · study puwa · photograph miapo · journey ranpa · cat mau · hello nyao
 ```
 
-## Writing system
+## The 16 semantic radicals (the meaning layer)
 
-The **NyaGlyph** font ([`font/build-cat-font.py`](font/build-cat-font.py),
-built with fontTools) maps each Latin letter, digit and common punctuation mark
-to a little cat: cat faces (with eyes + whiskers), paws, sitting / stretching /
-rolling cats, a paw-heart, fish, hearts and stars. Regenerate with:
-
-```bash
-python3 font/build-cat-font.py   # -> font/nyaglyph.woff
-```
-
-## Logographic writing (inspired by *Arrival*)
-
-![Nya sentence-rings: nested clauses, linking strokes, ink-weight](demo/preview-rings.png)
-
-Nya can also be written **non-phonetically**, as circular logograms. There are
-16 semantic **radicals** (atoms of meaning); every word is a transparent
-composition of them arranged around one ring, so the writing is decipherable by
-logic rather than by sound.
+Meaning is carried by 16 **radicals** (atoms of meaning). On a cat-sigil they are
+the mark on the cat's **forehead**, and a word can compose more than one, so the
+meaning is decipherable by logic rather than by sound.
 
 | radical | meaning | radical | meaning |
 | --- | --- | --- | --- |
@@ -101,25 +87,25 @@ university = place + see    microplastic = small + made + not + life
 journey = flow + self       hello = speak + feel
 ```
 
-Grammar lives in the ring: a **plural** adds a dashed outer ring, **emphasis**
-thickens the stroke, and unknown words fall back to hash-placed dots (distinct,
-but non-semantic).
+Unknown words carry no forehead mark; their ears, eyes and whiskers still encode
+the sound. See [`nya/logogram.mjs`](nya/logogram.mjs).
 
-Crucially, a whole sentence is drawn as **one ring** (`renderSentence`), not a
-row of separate glyphs: each word fuses onto the ring at its own sector, read
-clockwise from a start dot, and a question opens a gap in the ring. Commas and
-colons split a sentence into **nested sub-rings** (`renderNested`): rings
-within a ring, one per clause. Adjacent words are tied by a faint inner
-double-stroke, the ring's ink-weight thickens around heavier (multi-radical)
-words, and numbers become tally clusters. `renderText` lays out a whole
-paragraph as a stack of these rings. This is the holistic, non-linear mode (in
-the spirit of *Arrival*). See [`nya/logogram.mjs`](nya/logogram.mjs) and the demo.
+## The cat-alphabet (for names)
+
+Proper nouns are not turned into sigils; they are spelled letter-by-letter in the
+**NyaGlyph** cat-alphabet ([`font/build-cat-font.py`](font/build-cat-font.py),
+built with fontTools), where each Latin letter, digit and punctuation mark is a
+little cat: cat faces, paws, sitting / stretching / rolling cats, a paw-heart,
+fish, hearts and stars. Regenerate with:
+
+```bash
+python3 font/build-cat-font.py   # -> font/nyaglyph.woff
+```
 
 ## Unified script: one cat-sigil per word
 
-The phonetic cat-font and the semantic logograms fuse into a single system where
-**every word is one cat** ([`nya/script.mjs`](nya/script.mjs)). The cat's own
-anatomy encodes the word, sound and meaning together:
+Every word renders as one cat-sigil ([`nya/script.mjs`](nya/script.mjs)). The
+cat's own anatomy encodes the word, sound and meaning together:
 
 | feature | encodes |
 | --- | --- |
@@ -147,11 +133,12 @@ way a purr fills a room.
 ## Usage
 
 ```js
-import { translate } from 'nyalang'; // or './nya/nya.mjs'
-translate('Research journey');       // "Purwa ranpa"
-```
+import { translate } from 'nyalang';            // or './nya/nya.mjs'
+translate('Research journey');                   // "Purwa ranpa"
 
-Pair it with the `@font-face` NyaGlyph font to display the result as cats.
+import { renderCatText } from './nya/script.mjs';
+renderCatText('Research journey');               // -> a row of cat-sigils (SVG)
+```
 
 ## Demo
 
@@ -165,11 +152,11 @@ npm run demo   # python3 -m http.server 8080, then open /demo/
 nya/nya.mjs            # core lexicon + grammar + translator (spoken Nya)
 nya/lexicon.json       # the full 3200-word dictionary (generated)
 nya/build-lexicon.mjs  # dictionary generator (core + everyday vocabulary)
-nya/logogram.mjs       # semantic radicals + compositional logogram renderer
+nya/logogram.mjs       # the 16 semantic radicals (forehead-mark layer)
 nya/script.mjs         # the unified cat-sigil script (one cat per word)
-font/build-cat-font.py # the cat-glyph font generator (fontTools)
-font/nyaglyph.woff     # the built font
-demo/index.html        # live translator + cat font + logograms + legend
+font/build-cat-font.py # the cat-alphabet font generator (fontTools)
+font/nyaglyph.woff     # the built font (used for names)
+demo/index.html        # live translator: cat-sigils + radical legend
 ```
 
 ## License
