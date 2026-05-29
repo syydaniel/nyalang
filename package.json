@@ -1,0 +1,27 @@
+{
+  "name": "nyalang",
+  "version": "0.1.0",
+  "description": "Nya (猫猫语): a small constructed cat language with an invented lexicon, grammar, and a hand-built cat-glyph font.",
+  "type": "module",
+  "main": "nya/nya.mjs",
+  "exports": {
+    ".": "./nya/nya.mjs"
+  },
+  "files": [
+    "nya/",
+    "font/nyaglyph.woff",
+    "font/build-cat-font.py"
+  ],
+  "scripts": {
+    "font": "python3 font/build-cat-font.py",
+    "demo": "python3 -m http.server 8080"
+  },
+  "keywords": [
+    "conlang",
+    "constructed-language",
+    "cat",
+    "font",
+    "i18n"
+  ],
+  "license": "MIT"
+}

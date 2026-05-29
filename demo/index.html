@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nya · 猫猫语 demo</title>
+  <style>
+    @font-face {
+      font-family: 'NyaGlyph';
+      src: url('../font/nyaglyph.woff') format('woff');
+    }
+    body {
+      background: #0b0b12; color: #e8e8f0;
+      font-family: system-ui, sans-serif;
+      max-width: 760px; margin: 48px auto; padding: 0 20px; line-height: 1.6;
+    }
+    h1 { font-weight: 600; }
+    textarea {
+      width: 100%; height: 96px; font-size: 16px; box-sizing: border-box;
+      background: #16161f; color: #e8e8f0; border: 1px solid #333;
+      border-radius: 12px; padding: 14px; resize: vertical;
+    }
+    .label { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #888; margin-top: 22px; }
+    .nya { font-size: 19px; color: #9fe9d8; margin-top: 6px; }
+    .cats { font-family: 'NyaGlyph', system-ui; font-size: 42px; line-height: 1.7; color: #ffe1a8; letter-spacing: .08em; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <h1>Nya · 猫猫语</h1>
+  <p>Type English below. It is translated to the Nya cat language, then rendered in the hand-built NyaGlyph font, where every letter is a little cat.</p>
+  <textarea id="in">Hello! I study water and plastic, and I photograph the places I study.</textarea>
+  <div class="label">Nya (text)</div>
+  <div class="nya" id="nya"></div>
+  <div class="label">Nya (cat font)</div>
+  <div class="cats" id="cats"></div>
+
+  <script type="module">
+    import { translate } from '../nya/nya.mjs';
+    const inp = document.getElementById('in');
+    const nya = document.getElementById('nya');
+    const cats = document.getElementById('cats');
+    function update() {
+      const t = translate(inp.value);
+      nya.textContent = t;
+      cats.textContent = t;
+    }
+    inp.addEventListener('input', update);
+    update();
+  </script>
+</body>
+</html>
