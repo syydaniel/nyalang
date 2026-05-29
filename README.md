@@ -38,9 +38,18 @@ word, so the language is internally consistent even beyond the core lexicon.
 
 ## Lexicon
 
-~90 hand-made core words (pronouns, particles, common verbs, and the vocabulary
-of the site: water, plastic, river, research, photography, university...). See
-[`nya/nya.mjs`](nya/nya.mjs). A few:
+Two layers:
+
+- **Curated core**: ~90 hand-made words (pronouns, particles, common verbs, and
+  the vocabulary of the site: water, plastic, river, research, photography,
+  university...). See [`nya/nya.mjs`](nya/nya.mjs).
+- **Full dictionary**: **3200 words** in [`nya/lexicon.json`](nya/lexicon.json):
+  the curated core plus a broad spread of everyday English vocabulary, each
+  mapped to a unique, collision-free Nya word by the language's own phonetic
+  derivation. Regenerate with `node nya/build-lexicon.mjs`. The website
+  lazy-loads this file the first time 猫语 mode is used.
+
+A few core words:
 
 ```
 i mi · we nau · you yu · the na · and pa · with wim · not nim · yes nya
@@ -94,7 +103,7 @@ but non-semantic).
 Crucially, a whole sentence is drawn as **one ring** (`renderSentence`), not a
 row of separate glyphs: each word fuses onto the ring at its own sector, read
 clockwise from a start dot, and a question opens a gap in the ring. Commas and
-colons split a sentence into **nested sub-rings** (`renderNested`) — rings
+colons split a sentence into **nested sub-rings** (`renderNested`): rings
 within a ring, one per clause. Adjacent words are tied by a faint inner
 double-stroke, the ring's ink-weight thickens around heavier (multi-radical)
 words, and numbers become tally clusters. `renderText` lays out a whole
@@ -128,7 +137,9 @@ npm run demo   # python3 -m http.server 8080, then open /demo/
 ## Structure
 
 ```
-nya/nya.mjs            # lexicon + grammar + translator (spoken Nya)
+nya/nya.mjs            # core lexicon + grammar + translator (spoken Nya)
+nya/lexicon.json       # the full 3200-word dictionary (generated)
+nya/build-lexicon.mjs  # dictionary generator (core + everyday vocabulary)
 nya/logogram.mjs       # semantic radicals + compositional logogram renderer
 font/build-cat-font.py # the cat-glyph font generator (fontTools)
 font/nyaglyph.woff     # the built font

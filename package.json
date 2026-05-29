@@ -14,6 +14,7 @@
   ],
   "scripts": {
     "font": "python3 font/build-cat-font.py",
+    "lexicon": "node nya/build-lexicon.mjs",
     "demo": "python3 -m http.server 8080"
   },
   "keywords": [
