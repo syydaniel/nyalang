@@ -110,6 +110,26 @@ words, and numbers become tally clusters. `renderText` lays out a whole
 paragraph as a stack of these rings. This is the holistic, non-linear mode (in
 the spirit of *Arrival*). See [`nya/logogram.mjs`](nya/logogram.mjs) and the demo.
 
+## Unified script: one cat-sigil per word
+
+The phonetic cat-font and the semantic logograms fuse into a single system where
+**every word is one cat** ([`nya/script.mjs`](nya/script.mjs)). The cat's own
+anatomy encodes the word, sound and meaning together:
+
+| feature | encodes |
+| --- | --- |
+| ears | onset (first consonant of the spoken Nya word) |
+| eyes | the word's first vowel (a i u e o) |
+| whiskers | syllable count (1 to 3) |
+| forehead mark | meaning, drawn from the 16 semantic radicals |
+| closed-eye purring cat | the clause-final particle `nya` |
+
+So *miru* "water" is a cat with m ears, "i" eyes, two whiskers and a little wave
+on its forehead. Proper nouns and names are not turned into sigils: they stay
+spelled in the cat-alphabet (the NyaGlyph font), a separate register, the way
+mixed scripts use a syllabary for foreign names. Hover any glyph to read its
+romanized Nya. One system, used everywhere from headings to body text.
+
 ## Culture
 
 Nya is cat-centred. Its radicals are the things that matter to a cat: *self,
@@ -141,6 +161,7 @@ nya/nya.mjs            # core lexicon + grammar + translator (spoken Nya)
 nya/lexicon.json       # the full 3200-word dictionary (generated)
 nya/build-lexicon.mjs  # dictionary generator (core + everyday vocabulary)
 nya/logogram.mjs       # semantic radicals + compositional logogram renderer
+nya/script.mjs         # the unified cat-sigil script (one cat per word)
 font/build-cat-font.py # the cat-glyph font generator (fontTools)
 font/nyaglyph.woff     # the built font
 demo/index.html        # live translator + cat font + logograms + legend
