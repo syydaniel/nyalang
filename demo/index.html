@@ -7,11 +7,14 @@
   <style>
     @font-face { font-family: 'NyaGlyph'; src: url('../font/nyaglyph.woff') format('woff'); }
     :root { color: #eef0fa; }
-    body { background: #0b0b12; color: #e8e8f0; font-family: system-ui, sans-serif; max-width: 860px; margin: 44px auto; padding: 0 20px; line-height: 1.6; }
-    h1 { font-weight: 600; } h2 { font-weight: 600; font-size: 1rem; letter-spacing: .12em; text-transform: uppercase; color: #8fb; margin-top: 30px; }
-    textarea { width: 100%; height: 90px; box-sizing: border-box; font-size: 16px; background: #16161f; color: #e8e8f0; border: 1px solid #333; border-radius: 12px; padding: 14px; resize: vertical; }
+    body { background: #0b0b12; color: #e8e8f0; font-family: system-ui, sans-serif; max-width: 880px; margin: 44px auto; padding: 0 20px; line-height: 1.6; }
+    h1 { font-weight: 600; } h2 { font-weight: 600; font-size: 1rem; letter-spacing: .12em; text-transform: uppercase; color: #8fb; margin-top: 34px; }
+    .sub { color: #9aa0bd; font-size: .85rem; margin-top: -6px; }
+    textarea { width: 100%; height: 84px; box-sizing: border-box; font-size: 16px; background: #16161f; color: #e8e8f0; border: 1px solid #333; border-radius: 12px; padding: 14px; resize: vertical; }
     .nya { font-size: 19px; color: #9fe9d8; }
-    .cats { font-family: 'NyaGlyph', system-ui; font-size: 40px; line-height: 1.7; color: #ffe1a8; letter-spacing: .08em; }
+    /* the unified script: each word is one cat-sigil (this is what the website shows) */
+    #sigils { color: #ffe1a8; line-height: 1.35; }
+    .alpha { font-family: 'NyaGlyph', system-ui; font-size: 34px; color: #cbd0ea; letter-spacing: .06em; }
     .logos, .legend { display: flex; flex-wrap: wrap; gap: 16px; color: #eef0fa; }
     .item { text-align: center; width: 92px; }
     .item .w { font-size: 12px; color: #9aa0bd; margin-top: 2px; }
@@ -22,34 +25,41 @@
 </head>
 <body>
   <h1>Nya · 猫猫语</h1>
-  <p>A constructed cat language: a meaning-based lexicon, a small regular grammar, a hand-built cat-glyph font, and an Arrival-inspired <b>logographic</b> writing system where every word is a circle composed of semantic radicals. Type English and watch.</p>
+  <p>A constructed cat language: a meaning-based lexicon, a small regular grammar, and one
+  unified writing system where <b>every word is a single cat</b>. The cat's anatomy encodes
+  the word, sound and meaning together. Type English and watch.</p>
 
   <textarea id="in">Hello! I research water and microplastic in the world. The cat studies the river.</textarea>
+
+  <h2>The unified script — every word is one cat-sigil</h2>
+  <p class="sub">ears = onset · eyes = first vowel · whiskers = syllables · forehead = meaning · a purring cat = the particle "nya". This is exactly what the website renders.</p>
+  <div id="sigils"></div>
 
   <h2>Nya (spoken / romanized)</h2>
   <div class="nya" id="nya"></div>
 
-  <h2>Nya in the cat-glyph font</h2>
-  <div class="cats" id="cats"></div>
+  <h2>Names in the cat-alphabet (NyaGlyph font)</h2>
+  <p class="sub">Proper nouns are not turned into sigils; they are spelled in the cat-alphabet, a separate register.</p>
+  <div class="alpha" id="alpha">Yiyang Shen · Daniel</div>
 
-  <h2>Nya logograms — each sentence is ONE ring (read clockwise from the dot)</h2>
+  <h2>Also writable as Arrival-style rings — one ring per sentence</h2>
   <div class="logos" id="logos"></div>
 
-  <h2>The 16 radicals — learn these and you can decode the circles</h2>
+  <h2>The 16 radicals — learn these and you can decode both the foreheads and the circles</h2>
   <div class="legend" id="legend"></div>
 
   <script type="module">
     import { translate } from '../nya/nya.mjs';
+    import { renderCatText } from '../nya/script.mjs';
     import { renderNested, renderGlyph, RADICAL_GLOSSES } from '../nya/logogram.mjs';
     const inp = document.getElementById('in');
     const elNya = document.getElementById('nya');
-    const elCats = document.getElementById('cats');
+    const elSigils = document.getElementById('sigils');
     const elLogos = document.getElementById('logos');
 
     function update() {
-      const t = translate(inp.value);
-      elNya.textContent = t;
-      elCats.textContent = t;
+      elSigils.innerHTML = renderCatText(inp.value, { size: 46 });
+      elNya.textContent = translate(inp.value);
       const sentences = inp.value.split(/(?<=[.!?])\s+/).map((s) => s.trim()).filter(Boolean);
       elLogos.innerHTML = (sentences.length ? sentences : [inp.value])
         .map((s) => `<div class="item" style="width:auto;max-width:220px">${renderNested(s, { size: 200 })}<div class="w">${s}</div></div>`)
