@@ -40,7 +40,7 @@
 
   <script type="module">
     import { translate } from '../nya/nya.mjs';
-    import { renderSentence, renderGlyph, RADICAL_GLOSSES } from '../nya/logogram.mjs';
+    import { renderNested, renderGlyph, RADICAL_GLOSSES } from '../nya/logogram.mjs';
     const inp = document.getElementById('in');
     const elNya = document.getElementById('nya');
     const elCats = document.getElementById('cats');
@@ -52,7 +52,7 @@
       elCats.textContent = t;
       const sentences = inp.value.split(/(?<=[.!?])\s+/).map((s) => s.trim()).filter(Boolean);
       elLogos.innerHTML = (sentences.length ? sentences : [inp.value])
-        .map((s) => `<div class="item" style="width:auto;max-width:200px">${renderSentence(s, { size: 180 })}<div class="w">${s}</div></div>`)
+        .map((s) => `<div class="item" style="width:auto;max-width:220px">${renderNested(s, { size: 200 })}<div class="w">${s}</div></div>`)
         .join('');
     }
     inp.addEventListener('input', update);

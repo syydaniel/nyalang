@@ -93,9 +93,13 @@ but non-semantic).
 
 Crucially, a whole sentence is drawn as **one ring** (`renderSentence`), not a
 row of separate glyphs: each word fuses onto the ring at its own sector, read
-clockwise from a start dot, and a question opens a gap in the ring. This is the
-holistic, non-linear mode (in the spirit of *Arrival*). See
-[`nya/logogram.mjs`](nya/logogram.mjs) and the demo.
+clockwise from a start dot, and a question opens a gap in the ring. Commas and
+colons split a sentence into **nested sub-rings** (`renderNested`) — rings
+within a ring, one per clause. Adjacent words are tied by a faint inner
+double-stroke, the ring's ink-weight thickens around heavier (multi-radical)
+words, and numbers become tally clusters. `renderText` lays out a whole
+paragraph as a stack of these rings. This is the holistic, non-linear mode (in
+the spirit of *Arrival*). See [`nya/logogram.mjs`](nya/logogram.mjs) and the demo.
 
 ## Culture
 

@@ -159,33 +159,118 @@ function renderCluster(radicals, px, py, s) {
   }).join('');
 }
 
-export function renderSentence(text, opts = {}) {
-  const size = opts.size || 220;
-  const words = (String(text).toLowerCase().match(/[a-z]+/g) || []).filter((w) => !SKIP.has(w));
-  const cx = 50, cy = 50, BR = 33;
-  const N = Math.max(words.length, 1);
-  const scale = N <= 3 ? 0.62 : N <= 6 ? 0.5 : 0.4;
-  const isQ = /\?/.test(text);
-
-  let clusters = '';
-  let stems = '';
-  words.forEach((w, i) => {
-    const ang = 90 - (i + 0.5) * (360 / N);
-    const [px, py] = ringPt(cx, cy, BR, ang);
-    clusters += renderCluster(glyphFor(w).radicals, px, py, scale);
-    const [ix, iy] = ringPt(cx, cy, BR - 6, ang);
-    const [ox, oy] = ringPt(cx, cy, BR + 6, ang);
-    stems += `<line x1="${ix.toFixed(1)}" y1="${iy.toFixed(1)}" x2="${ox.toFixed(1)}" y2="${oy.toFixed(1)}" stroke-width="0.8"/>`;
-  });
-
-  // ring: a near-complete circle with a gap at the top (start); wider if a question
-  const gap = isQ ? 30 : 8;
-  const [sx, sy] = ringPt(cx, cy, BR, 90 - gap / 2);
-  const [ex, ey] = ringPt(cx, cy, BR, 90 + gap / 2);
-  const ring = `<path d="M${sx.toFixed(2)} ${sy.toFixed(2)} A ${BR} ${BR} 0 1 1 ${ex.toFixed(2)} ${ey.toFixed(2)}"/>`;
-  const start = `<circle cx="${cx}" cy="${(cy - BR).toFixed(1)}" r="2.6" fill="currentColor" stroke="none"/>`;
-
-  return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" role="img" aria-label="${String(opts.label || text).replace(/"/g, '')}" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ring}${stems}${start}${clusters}</g></svg>`;
+// a number node: tally ticks for small counts, a "great count" for large ones
+function renderNumber(val, px, py, s) {
+  const n = parseInt(val, 10);
+  if (n >= 1 && n <= 6) {
+    const span = (n - 1) * 4;
+    let m = '';
+    for (let j = 0; j < n; j++) {
+      const x = px - span / 2 + j * 4;
+      m += `<line x1="${x.toFixed(1)}" y1="${(py - 5).toFixed(1)}" x2="${x.toFixed(1)}" y2="${(py + 5).toFixed(1)}"/>`;
+    }
+    return m;
+  }
+  return clusterRadical('many', px, py, s) + `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="${(11 * s).toFixed(1)}"/>`;
 }
 
-export default { RADICALS: RADICAL_GLOSSES, CONCEPTS, renderGlyph, glyphFor, glyphsForPhrase, renderSentence };
+// internal punctuation: a notch crossing the ring (a clause break); ; and : add an outer dot
+function renderDivider(chars, cx, cy, BR, ang) {
+  const [ix, iy] = ringPt(cx, cy, BR - 4.5, ang);
+  const [ox, oy] = ringPt(cx, cy, BR + 4.5, ang);
+  let d = `<line x1="${ix.toFixed(1)}" y1="${iy.toFixed(1)}" x2="${ox.toFixed(1)}" y2="${oy.toFixed(1)}" stroke-width="2.4"/>`;
+  if (/[;:]/.test(chars)) {
+    const [mx, my] = ringPt(cx, cy, BR + 8, ang);
+    d += `<circle cx="${mx.toFixed(1)}" cy="${my.toFixed(1)}" r="1.7" fill="currentColor" stroke="none"/>`;
+  }
+  return d;
+}
+
+// arc from a0 clockwise to a1 (degrees, math convention; SVG sweep=1)
+const arcPath = (cx, cy, r, a0, a1) => {
+  const [x0, y0] = ringPt(cx, cy, r, a0);
+  const [x1, y1] = ringPt(cx, cy, r, a1);
+  const large = ((a0 - a1 + 360) % 360) > 180 ? 1 : 0;
+  return `M${x0.toFixed(2)} ${y0.toFixed(2)} A ${r.toFixed(2)} ${r.toFixed(2)} 0 ${large} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`;
+};
+
+const SVG_OPEN = (size, label) => `<svg viewBox="0 0 100 100" width="${size}" height="${size}" role="img" aria-label="${String(label || '').replace(/"/g, '')}" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">`;
+const SVG_CLOSE = `</g></svg>`;
+
+// Draw one sentence (ring + clusters + punctuation) at a given centre/radius.
+// Returns raw markup (no <svg>) so it can be nested inside a bigger ring.
+function sentenceInner(text, cx, cy, BR) {
+  const toks = String(text).match(/[A-Za-z]+|[0-9]+|[.,;:!?]/g) || [];
+  const nodes = []; const divAfter = {}; let terminal = '';
+  for (const t of toks) {
+    if (/^[A-Za-z]+$/.test(t)) { if (!SKIP.has(t.toLowerCase())) nodes.push({ kind: 'word', val: t }); }
+    else if (/^[0-9]+$/.test(t)) nodes.push({ kind: 'num', val: t });
+    else if (t === '.' || t === '!' || t === '?') terminal = t;
+    else if (nodes.length) divAfter[nodes.length - 1] = (divAfter[nodes.length - 1] || '') + t;
+  }
+  const N = Math.max(nodes.length, 1);
+  const k = BR / 33;
+  const scale = (N <= 3 ? 0.62 : N <= 6 ? 0.5 : 0.4) * k;
+  const angleOf = (i) => 90 - (i + 0.5) * (360 / N);
+  const isQ = terminal === '?';
+  const isExcl = terminal === '!';
+  const gap = isQ ? 30 : 9;
+
+  // base ring + a faint inner concentric line (Arrival-style double stroke = linking)
+  let parts = `<path d="${arcPath(cx, cy, BR, 90 - gap / 2, 90 + gap / 2 - 360)}" stroke-width="${(1.9 * k).toFixed(2)}"/>`;
+  parts += `<path d="${arcPath(cx, cy, BR - 3 * k, 90 - gap / 2, 90 + gap / 2 - 360)}" stroke-width="${(0.7 * k).toFixed(2)}"/>`;
+
+  let clusters = '', stems = '', dividers = '', heavy = '';
+  nodes.forEach((node, i) => {
+    const ang = angleOf(i);
+    const [px, py] = ringPt(cx, cy, BR, ang);
+    clusters += node.kind === 'num' ? renderNumber(node.val, px, py, scale) : renderCluster(glyphFor(node.val).radicals, px, py, scale);
+    const [ix, iy] = ringPt(cx, cy, BR - 6 * k, ang);
+    const [ox, oy] = ringPt(cx, cy, BR + 6 * k, ang);
+    stems += `<line x1="${ix.toFixed(1)}" y1="${iy.toFixed(1)}" x2="${ox.toFixed(1)}" y2="${oy.toFixed(1)}" stroke-width="${(0.8 * k).toFixed(2)}"/>`;
+    // ink-weight variation: thicken the arc leading into "heavier" (multi-radical) words
+    if (i < N - 1 && node.kind === 'word' && glyphFor(node.val).radicals.length >= 2) {
+      heavy += `<path d="${arcPath(cx, cy, BR, angleOf(i), angleOf(i + 1))}" stroke-width="${(3.4 * k).toFixed(2)}"/>`;
+    }
+    if (divAfter[i] && i < N - 1) dividers += renderDivider(divAfter[i], cx, cy, BR, (angleOf(i) + angleOf(i + 1)) / 2);
+  });
+
+  let start = `<circle cx="${cx}" cy="${(cy - BR).toFixed(1)}" r="${(2.6 * k).toFixed(1)}" fill="currentColor" stroke="none"/>`;
+  if (isExcl) start += `<line x1="${cx}" y1="${(cy - BR - 3 * k).toFixed(1)}" x2="${cx}" y2="${(cy - BR - 10 * k).toFixed(1)}" stroke-width="${(2.6 * k).toFixed(2)}"/>`;
+
+  return parts + heavy + dividers + stems + start + clusters;
+}
+
+export function renderSentence(text, opts = {}) {
+  return SVG_OPEN(opts.size || 220, opts.label || text) + sentenceInner(text, 50, 50, 33) + SVG_CLOSE;
+}
+
+// Nested clauses = rings within a ring: a sentence with commas / colons becomes a
+// big ring whose clauses are smaller sub-rings arranged inside it.
+export function renderNested(text, opts = {}) {
+  const clauses = String(text).split(/[,;:]+/).map((c) => c.trim()).filter(Boolean);
+  if (clauses.length <= 1) return renderSentence(text, opts);
+  const cx = 50, cy = 50, BR = 46;
+  const terminal = (String(text).match(/[.!?]\s*$/) || [''])[0].trim();
+  const gap = terminal === '?' ? 26 : 8;
+  let inner = `<path d="${arcPath(cx, cy, BR, 90 - gap / 2, 90 + gap / 2 - 360)}" stroke-width="2.4"/>`;
+  inner += `<circle cx="${cx}" cy="${(cy - BR).toFixed(1)}" r="2.8" fill="currentColor" stroke="none"/>`;
+  const M = clauses.length;
+  const subR = M === 2 ? 18 : M === 3 ? 15 : 13;
+  const orbit = 22;
+  clauses.forEach((cl, i) => {
+    const a = 90 - (i + 0.5) * (360 / M);
+    const scx = cx + orbit * Math.cos(deg(a));
+    const scy = cy - orbit * Math.sin(deg(a));
+    inner += sentenceInner(cl + (i === M - 1 ? terminal : ''), scx, scy, subR);
+  });
+  return SVG_OPEN(opts.size || 240, opts.label || text) + inner + SVG_CLOSE;
+}
+
+// One ring per sentence (nested if a sentence has clauses). For whole-page text.
+export function renderText(text, opts = {}) {
+  const sents = String(text).split(/(?<=[.!?])\s+/).map((s) => s.trim()).filter(Boolean);
+  return (sents.length ? sents : [String(text)]).map((s) => renderNested(s, opts));
+}
+
+export default { RADICALS: RADICAL_GLOSSES, CONCEPTS, renderGlyph, glyphFor, glyphsForPhrase, renderSentence, renderNested, renderText };
