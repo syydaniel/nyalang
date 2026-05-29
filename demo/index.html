@@ -32,7 +32,7 @@
   <h2>Nya in the cat-glyph font</h2>
   <div class="cats" id="cats"></div>
 
-  <h2>Nya logograms (read the circles)</h2>
+  <h2>Nya logograms — each sentence is ONE ring (read clockwise from the dot)</h2>
   <div class="logos" id="logos"></div>
 
   <h2>The 16 radicals — learn these and you can decode the circles</h2>
@@ -40,7 +40,7 @@
 
   <script type="module">
     import { translate } from '../nya/nya.mjs';
-    import { glyphsForPhrase, renderGlyph, RADICAL_GLOSSES } from '../nya/logogram.mjs';
+    import { renderSentence, renderGlyph, RADICAL_GLOSSES } from '../nya/logogram.mjs';
     const inp = document.getElementById('in');
     const elNya = document.getElementById('nya');
     const elCats = document.getElementById('cats');
@@ -50,8 +50,9 @@
       const t = translate(inp.value);
       elNya.textContent = t;
       elCats.textContent = t;
-      elLogos.innerHTML = glyphsForPhrase(inp.value, { size: 72 })
-        .map((g) => `<div class="item">${g.svg}<div class="w">${g.word}</div><div class="r">${g.radicals.join('+') || '?'}</div></div>`)
+      const sentences = inp.value.split(/(?<=[.!?])\s+/).map((s) => s.trim()).filter(Boolean);
+      elLogos.innerHTML = (sentences.length ? sentences : [inp.value])
+        .map((s) => `<div class="item" style="width:auto;max-width:200px">${renderSentence(s, { size: 180 })}<div class="w">${s}</div></div>`)
         .join('');
     }
     inp.addEventListener('input', update);

@@ -134,4 +134,58 @@ export function glyphsForPhrase(text, opts = {}) {
     .map((w) => glyphFor(w, opts));
 }
 
-export default { RADICALS: RADICAL_GLOSSES, CONCEPTS, renderGlyph, glyphFor, glyphsForPhrase };
+// ---------- sentence as ONE circle (Heptapod-style) ----------
+// The whole utterance is a single ring. Each content word fuses onto the ring
+// at its own sector (read clockwise from the start dot); its radicals cluster
+// there. A question opens a wide gap in the ring. This is holistic, not linear.
+const ringPt = (cx, cy, r, a) => [cx + r * Math.cos(deg(a)), cy - r * Math.sin(deg(a))];
+
+function clusterRadical(id, x, y, s) {
+  if (id === 'big') return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(12 * s).toFixed(1)}"/>`;
+  if (id === 'not') { const o = 9 * s; return `<line x1="${(x - o).toFixed(1)}" y1="${(y + o).toFixed(1)}" x2="${(x + o).toFixed(1)}" y2="${(y - o).toFixed(1)}"/>`; }
+  if (id === 'being') { const e = 5 * s; return `<path d="M${(x - e).toFixed(1)} ${(y - e * 0.4).toFixed(1)} l${(e * 0.5).toFixed(1)} ${(-e * 1.4).toFixed(1)} l${(e * 1.1).toFixed(1)} ${(e).toFixed(1)}z"/><path d="M${(x + e).toFixed(1)} ${(y - e * 0.4).toFixed(1)} l${(-e * 0.5).toFixed(1)} ${(-e * 1.4).toFixed(1)} l${(-e * 1.1).toFixed(1)} ${(e).toFixed(1)}z"/>`; }
+  const inner = RADICALS[id] ? RADICALS[id].draw(x, y) : '';
+  return `<g transform="translate(${x.toFixed(2)} ${y.toFixed(2)}) scale(${s}) translate(${(-x).toFixed(2)} ${(-y).toFixed(2)})">${inner}</g>`;
+}
+
+function renderCluster(radicals, px, py, s) {
+  if (!radicals.length) return `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="1.8" fill="currentColor" stroke="none"/>`;
+  const k = radicals.length;
+  const o = k === 1 ? 0 : 7.5;
+  return radicals.map((id, j) => {
+    const a = 90 - j * (360 / k);
+    const x = px + o * Math.cos(deg(a)), y = py - o * Math.sin(deg(a));
+    return clusterRadical(id, x, y, s);
+  }).join('');
+}
+
+export function renderSentence(text, opts = {}) {
+  const size = opts.size || 220;
+  const words = (String(text).toLowerCase().match(/[a-z]+/g) || []).filter((w) => !SKIP.has(w));
+  const cx = 50, cy = 50, BR = 33;
+  const N = Math.max(words.length, 1);
+  const scale = N <= 3 ? 0.62 : N <= 6 ? 0.5 : 0.4;
+  const isQ = /\?/.test(text);
+
+  let clusters = '';
+  let stems = '';
+  words.forEach((w, i) => {
+    const ang = 90 - (i + 0.5) * (360 / N);
+    const [px, py] = ringPt(cx, cy, BR, ang);
+    clusters += renderCluster(glyphFor(w).radicals, px, py, scale);
+    const [ix, iy] = ringPt(cx, cy, BR - 6, ang);
+    const [ox, oy] = ringPt(cx, cy, BR + 6, ang);
+    stems += `<line x1="${ix.toFixed(1)}" y1="${iy.toFixed(1)}" x2="${ox.toFixed(1)}" y2="${oy.toFixed(1)}" stroke-width="0.8"/>`;
+  });
+
+  // ring: a near-complete circle with a gap at the top (start); wider if a question
+  const gap = isQ ? 30 : 8;
+  const [sx, sy] = ringPt(cx, cy, BR, 90 - gap / 2);
+  const [ex, ey] = ringPt(cx, cy, BR, 90 + gap / 2);
+  const ring = `<path d="M${sx.toFixed(2)} ${sy.toFixed(2)} A ${BR} ${BR} 0 1 1 ${ex.toFixed(2)} ${ey.toFixed(2)}"/>`;
+  const start = `<circle cx="${cx}" cy="${(cy - BR).toFixed(1)}" r="2.6" fill="currentColor" stroke="none"/>`;
+
+  return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" role="img" aria-label="${String(opts.label || text).replace(/"/g, '')}" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ring}${stems}${start}${clusters}</g></svg>`;
+}
+
+export default { RADICALS: RADICAL_GLOSSES, CONCEPTS, renderGlyph, glyphFor, glyphsForPhrase, renderSentence };

@@ -89,7 +89,13 @@ journey = flow + self       hello = speak + feel
 
 Grammar lives in the ring: a **plural** adds a dashed outer ring, **emphasis**
 thickens the stroke, and unknown words fall back to hash-placed dots (distinct,
-but non-semantic). See [`nya/logogram.mjs`](nya/logogram.mjs) and the demo.
+but non-semantic).
+
+Crucially, a whole sentence is drawn as **one ring** (`renderSentence`), not a
+row of separate glyphs: each word fuses onto the ring at its own sector, read
+clockwise from a start dot, and a question opens a gap in the ring. This is the
+holistic, non-linear mode (in the spirit of *Arrival*). See
+[`nya/logogram.mjs`](nya/logogram.mjs) and the demo.
 
 ## Culture
 
