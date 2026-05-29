@@ -52,6 +52,10 @@ Two layers:
   derivation. Regenerate with `node nya/build-lexicon.mjs`. The website
   lazy-loads this file the first time 猫语 mode is used.
 
+All 3200 words, each rendered as one cat (browse them interactively in the demo):
+
+![The full 3200-word Nya dictionary](demo/preview-all.png)
+
 A few core words:
 
 ```

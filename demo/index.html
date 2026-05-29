@@ -14,6 +14,9 @@
     .nya { font-size: 19px; color: #9fe9d8; }
     /* the unified script: each word is one cat-sigil (this is what the website shows) */
     #sigils { color: #ffe1a8; line-height: 1.35; }
+    #dict { display: flex; flex-wrap: wrap; gap: 5px; color: #ffe1a8; margin-top: 12px; }
+    .loadbtn { background: #16261f; color: #9fe9d8; border: 1px solid #2a6; border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 13px; }
+    .loadbtn:hover { background: #1c3329; }
     .alpha { font-family: 'NyaGlyph', system-ui; font-size: 34px; color: #cbd0ea; letter-spacing: .06em; }
     .logos, .legend { display: flex; flex-wrap: wrap; gap: 16px; color: #eef0fa; }
     .item { text-align: center; width: 92px; }
@@ -42,13 +45,17 @@
   <p class="sub">Proper nouns are not turned into sigils; they are spelled in the cat-alphabet, a separate register.</p>
   <div class="alpha" id="alpha">Yiyang Shen · Daniel</div>
 
+  <h2>The full dictionary: 3200 words</h2>
+  <p class="sub">The curated core plus everyday vocabulary. <button id="loadAll" class="loadbtn">Render all 3200 cats</button> &nbsp; hover any cat for its word.</p>
+  <div id="dict"></div>
+
   <h2>The 16 radicals: learn these and you can decode the foreheads</h2>
   <div class="legend" id="legend"></div>
 
   <script type="module">
     import { translate } from '../nya/nya.mjs';
-    import { renderCatText } from '../nya/script.mjs';
-    import { renderGlyph, RADICAL_GLOSSES } from '../nya/logogram.mjs';
+    import { renderCatText, catSigil } from '../nya/script.mjs';
+    import { renderGlyph, RADICAL_GLOSSES, radicalsFor } from '../nya/logogram.mjs';
     const inp = document.getElementById('in');
     const elNya = document.getElementById('nya');
     const elSigils = document.getElementById('sigils');
@@ -63,6 +70,26 @@
     document.getElementById('legend').innerHTML = Object.entries(RADICAL_GLOSSES)
       .map(([id, gloss]) => `<div class="item">${renderGlyph([id], { size: 64 })}<div class="w">${id}</div><div class="r">${gloss}</div></div>`)
       .join('');
+
+    // render every word in the 3200-word dictionary on demand (it is a lot of cats)
+    document.getElementById('loadAll').addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      btn.disabled = true;
+      btn.textContent = 'Loading…';
+      let lex;
+      try { lex = await (await fetch('../nya/lexicon.json')).json(); }
+      catch { btn.textContent = 'could not load lexicon.json'; return; }
+      const frag = document.createDocumentFragment();
+      for (const en in lex) {
+        const s = document.createElement('span');
+        s.title = en + ' · ' + lex[en];
+        s.style.cssText = 'display:inline-block;width:34px;height:34px';
+        s.innerHTML = catSigil(lex[en], radicalsFor(en));
+        frag.appendChild(s);
+      }
+      document.getElementById('dict').appendChild(frag);
+      btn.textContent = Object.keys(lex).length + ' cats ✓';
+    });
   </script>
 </body>
 </html>
