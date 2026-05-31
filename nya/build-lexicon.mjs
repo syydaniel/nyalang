@@ -5,7 +5,7 @@
 //
 // Run: node nya/build-lexicon.mjs
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { LEXICON, fallbackWord } from './nya.mjs';
+import { LEXICON, fallbackWord, analyze } from './nya.mjs';
 import { CONCEPTS } from './logogram.mjs';
 
 const TARGET = 3200;
@@ -29,7 +29,7 @@ const lex = { ...LEXICON };
 const used = new Set(Object.values(lex).filter(Boolean));
 
 function uniqueNya(word) {
-  let w = fallbackWord(word);
+  let w = analyze(word).nya || fallbackWord(word);
   let n = 0;
   while ((used.has(w) || !w) && n < 12) {
     w += NUC[(word.charCodeAt(n % word.length) + n) % 5];

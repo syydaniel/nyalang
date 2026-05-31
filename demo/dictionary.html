@@ -40,6 +40,7 @@
   <script type="module">
     import { catSigil } from '../nya/script.mjs';
     import { radicalsFor } from '../nya/logogram.mjs';
+    import { analyze } from '../nya/nya.mjs';
 
     const lex = await (await fetch('../nya/lexicon.json')).json();
     const entries = Object.entries(lex).sort((a, b) => (a[0] < b[0] ? -1 : 1));
@@ -53,7 +54,7 @@
       if (rads.length) meaningful++;
       const gloss = rads.length ? rads.join(' + ') : '';
       html += `<div class="entry" data-en="${en}" data-nya="${nya}" data-m="${rads.length ? 1 : 0}">`
-        + `<div class="glyph">${catSigil(nya, rads)}</div>`
+        + `<div class="glyph">${catSigil(nya, rads, analyze(en).features)}</div>`
         + `<div class="meta"><div class="hw">${en}</div><div class="nya">${nya}</div>`
         + (gloss ? `<div class="gloss">${gloss}</div>` : '') + `</div></div>`;
     }
