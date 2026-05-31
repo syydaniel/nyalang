@@ -30,6 +30,9 @@ const used = new Set(Object.values(lex).filter(Boolean));
 
 function uniqueNya(word) {
   let w = analyze(word).nya || fallbackWord(word);
+  // Words with a real meaning compose transparently from their radicals; keep
+  // that sound even if it collides (near-synonyms are allowed to be homophones).
+  if (CONCEPTS[word]) return w;
   let n = 0;
   while ((used.has(w) || !w) && n < 12) {
     w += NUC[(word.charCodeAt(n % word.length) + n) % 5];
