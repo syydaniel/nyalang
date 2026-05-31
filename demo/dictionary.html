@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nya Dictionary · 猫猫语字典</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { background: #0b0b12; color: #e8e8f0; font-family: system-ui, sans-serif; max-width: 1100px; margin: 0 auto; padding: 28px 20px 80px; line-height: 1.5; }
+    h1 { font-weight: 600; margin: 0 0 4px; }
+    .lead { color: #9aa0bd; font-size: .9rem; margin: 0 0 18px; }
+    .controls { position: sticky; top: 0; background: #0b0b12ee; backdrop-filter: blur(6px); padding: 12px 0; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; border-bottom: 1px solid #ffffff14; z-index: 5; }
+    #q { flex: 1; min-width: 220px; font-size: 15px; background: #16161f; color: #e8e8f0; border: 1px solid #333; border-radius: 10px; padding: 10px 12px; }
+    label { font-size: 13px; color: #cbd0ea; display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+    #count { font-size: 12px; color: #6fd3c0; font-family: monospace; }
+    #entries { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 10px; margin-top: 18px; }
+    .letter { grid-column: 1 / -1; font-family: monospace; font-size: 13px; letter-spacing: .2em; color: #8fb; border-bottom: 1px solid #ffffff14; padding: 14px 0 4px; margin: 6px 0 0; }
+    .entry { display: flex; gap: 10px; align-items: center; background: #ffffff08; border: 1px solid #ffffff0f; border-radius: 12px; padding: 8px 10px; }
+    .glyph { width: 46px; height: 46px; flex: none; color: #ffe1a8; }
+    .meta { min-width: 0; }
+    .hw { font-size: 14px; font-weight: 600; color: #eef0fa; overflow-wrap: anywhere; }
+    .nya { font-family: monospace; font-size: 13px; color: #9fe9d8; }
+    .gloss { font-size: 11px; color: #8a90ad; margin-top: 1px; }
+    .empty { grid-column: 1 / -1; color: #9aa0bd; padding: 30px 0; text-align: center; }
+    a.back { color: #6fd3c0; font-size: 13px; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <h1>Nya Dictionary <span style="color:#9aa0bd;font-weight:400">· 猫猫语字典</span></h1>
+  <p class="lead">Every word as one cat-sigil. <b style="color:#cbd0ea">ears</b> = onset, <b style="color:#cbd0ea">eyes</b> = vowel, <b style="color:#cbd0ea">whiskers</b> = syllables, <b style="color:#cbd0ea">forehead</b> = meaning. <a class="back" href="index.html">&larr; live translator</a></p>
+
+  <div class="controls">
+    <input id="q" type="search" placeholder="Search English or Nya…" autocomplete="off" />
+    <label><input type="checkbox" id="meaningful" /> only words with a meaning mark</label>
+    <span id="count"></span>
+  </div>
+
+  <div id="entries"><p class="empty">Loading the dictionary…</p></div>
+
+  <script type="module">
+    import { catSigil } from '../nya/script.mjs';
+    import { radicalsFor } from '../nya/logogram.mjs';
+
+    const lex = await (await fetch('../nya/lexicon.json')).json();
+    const entries = Object.entries(lex).sort((a, b) => (a[0] < b[0] ? -1 : 1));
+    let meaningful = 0;
+    let html = '';
+    let letter = '';
+    for (const [en, nya] of entries) {
+      const L = (en[0] || '#').toUpperCase();
+      if (L !== letter) { letter = L; html += `<h2 class="letter">${L}</h2>`; }
+      const rads = radicalsFor(en);
+      if (rads.length) meaningful++;
+      const gloss = rads.length ? rads.join(' + ') : '';
+      html += `<div class="entry" data-en="${en}" data-nya="${nya}" data-m="${rads.length ? 1 : 0}">`
+        + `<div class="glyph">${catSigil(nya, rads)}</div>`
+        + `<div class="meta"><div class="hw">${en}</div><div class="nya">${nya}</div>`
+        + (gloss ? `<div class="gloss">${gloss}</div>` : '') + `</div></div>`;
+    }
+    document.getElementById('entries').innerHTML = html;
+    document.getElementById('count').textContent = entries.length + ' words · ' + meaningful + ' with meaning';
+
+    const q = document.getElementById('q');
+    const mOnly = document.getElementById('meaningful');
+    let raf = 0;
+    function apply() {
+      const term = q.value.trim().toLowerCase();
+      const m = mOnly.checked;
+      for (const e of document.querySelectorAll('.entry')) {
+        const ok = (!term || e.dataset.en.includes(term) || e.dataset.nya.includes(term)) && (!m || e.dataset.m === '1');
+        e.style.display = ok ? '' : 'none';
+      }
+      for (const h of document.querySelectorAll('.letter')) {
+        let sib = h.nextElementSibling, any = false;
+        while (sib && !sib.classList.contains('letter')) { if (sib.style.display !== 'none') { any = true; break; } sib = sib.nextElementSibling; }
+        h.style.display = any ? '' : 'none';
+      }
+    }
+    const onInput = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(apply); };
+    q.addEventListener('input', onInput);
+    mOnly.addEventListener('change', apply);
+  </script>
+</body>
+</html>

@@ -56,6 +56,10 @@ All 3200 words, each rendered as one cat (browse them interactively in the demo)
 
 ![The full 3200-word Nya dictionary](demo/preview-all.png)
 
+Browse the full **rendered dictionary** ([`demo/dictionary.html`](demo/dictionary.html)):
+every word as a cat-sigil with its English gloss, romanized Nya, and (where it has
+one) its radical composition. Searchable and alphabetised.
+
 A few core words:
 
 ```
@@ -161,6 +165,7 @@ nya/script.mjs         # the unified cat-sigil script (one cat per word)
 font/build-cat-font.py # the cat-alphabet font generator (fontTools)
 font/nyaglyph.woff     # the built font (used for names)
 demo/index.html        # live translator: cat-sigils + radical legend
+demo/dictionary.html   # the rendered, searchable dictionary (every word)
 ```
 
 ## License

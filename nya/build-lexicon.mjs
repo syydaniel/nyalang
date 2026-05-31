@@ -6,6 +6,7 @@
 // Run: node nya/build-lexicon.mjs
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { LEXICON, fallbackWord } from './nya.mjs';
+import { CONCEPTS } from './logogram.mjs';
 
 const TARGET = 3200;
 const NUC = ['a', 'i', 'u', 'e', 'o'];
@@ -41,7 +42,9 @@ function uniqueNya(word) {
 // breadth from the spread sample.
 const COMMON = ('time year people way day man thing woman life child world school state family student group country problem hand part place case week company system program work government number night point home water room mother area money story fact month lot right study book eye job word business issue side kind head house service friend father power hour game line end member law car city community name president team minute idea body back parent face level office door health person art war history party result change morning reason research girl guy moment air teacher force education foot boy age policy music market sense nation plan college interest death experience effect use class control care field development role effort rule heart sun light star moon sky cloud rain snow wind sea ocean river lake mountain hill tree flower grass forest leaf root fruit seed fish bird dog cat horse cow animal food bread milk egg meat rice tea coffee sugar salt color red blue green yellow black white good bad big small long short high low new old young hot cold fast slow happy sad easy hard early late strong weak rich poor clean dark deep wide warm cool fresh love hope dream truth peace mind soul voice sound dance song future past present evening winter summer spring autumn north south east west left walk run jump swim fly read write speak listen learn teach think know feel see hear give take make build grow move stop start play help eat drink sleep wake live die come go stay leave find lose win buy sell ask answer call meet like want need try keep hold turn show tell sing draw paint cook wash send carry follow lead create question beautiful science culture nature').split(' ');
 
-for (const en of COMMON.concat(words)) {
+// concept words first (so every word that has a meaning is in the dictionary),
+// then everyday vocabulary, then breadth from the spread sample.
+for (const en of Object.keys(CONCEPTS).concat(COMMON, words)) {
   if (Object.keys(lex).length >= TARGET) break;
   if (!en || lex[en] !== undefined) continue;
   const nya = uniqueNya(en);
