@@ -10,6 +10,11 @@ extracted here as a standalone language system.
 
 ![Nya: every word is one cat-sigil](demo/preview-sigils.png)
 
+**[Open the translator station](demo/translate.html)**: a fancy, self-contained
+page that translates English to Nya (and back), renders each word as a cat-sigil,
+breaks every word down, reads it aloud, and includes the full dictionary and a
+"learn the cats" guide.
+
 ```
 Hello! I study water and plastic.
 ->  Nyao! Mi puwa miru pa puran nya.

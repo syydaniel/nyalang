@@ -5,7 +5,7 @@
 //
 // Run: node nya/build-lexicon.mjs
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { LEXICON, fallbackWord, analyze } from './nya.mjs';
+import { LEXICON, fallbackWord, analyze, word } from './nya.mjs';
 import { CONCEPTS } from './logogram.mjs';
 
 const TARGET = 3200;
@@ -25,7 +25,10 @@ if (raw.length > TARGET * 1.4) {
   words = raw.filter((_, i) => i % step === 0);
 }
 
-const lex = { ...LEXICON };
+// Seed from the curated keys but via the live engine, so stored forms match what
+// word() actually produces now (content words compose: river -> waro, not mirun).
+const lex = {};
+for (const k in LEXICON) { const v = word(k); if (v) lex[k] = v; }
 const used = new Set(Object.values(lex).filter(Boolean));
 
 function uniqueNya(word) {
